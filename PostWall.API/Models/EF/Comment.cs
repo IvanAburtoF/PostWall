@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using PostWall.WEB.Data;
-using System.ComponentModel.DataAnnotations;
-namespace PostWall.Data.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using PostWall.Data;
+
+namespace PostWall.API.Models.EF;
 
 public class Comment
 {
@@ -16,7 +16,9 @@ public class Comment
 
     public int PostId { get; set; }
     public Post Post { get; set; } = null!;
-
     public string UserId { get; set; } = null!;
-    public ApplicationUser User { get; set; } = null!;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
+
+    public ICollection<ApplicationUser>? LikedBy { get; set; }
+    public ICollection<ApplicationUser>? DislikedBy { get; set; }
 }

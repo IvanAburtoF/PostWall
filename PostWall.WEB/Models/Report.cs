@@ -1,13 +1,15 @@
-﻿namespace PostWall.Data.Models;
+﻿using PostWall.WEB.Data;
+
+namespace PostWall.Data.Models;
 
 public class Report
 {
     public int Id { get; set; }
-    public string Reason { get; set; }
+    public string Reason { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public bool IsReviewed { get; set; }
     public int CommentId { get; set; }
-    public Comment Comment { get; set; }
-    public string UserId { get; set; }
-    public ApplicationUser User { get; set; }
+    public Comment Comment { get; set; } = null!;
+    public string UserId { get; set; } = null!;
+    public ApplicationUser User { get; set; } = null!;
 }

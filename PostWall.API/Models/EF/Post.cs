@@ -1,6 +1,6 @@
-﻿using PostWall.WEB.Data;
+﻿using PostWall.Data;
 
-namespace PostWall.Data.Models;
+namespace PostWall.API.Models.EF;
 
 public class Post
 {
@@ -16,5 +16,7 @@ public class Post
     public bool IsHidden { get; set; } = false;
     //identity
     public string UserId { get; set; } = null!;
-    public ApplicationUser User { get; set; } = null!;
+    public ApplicationUser ApplicationUser { get; set; } = null!;
+    public ICollection<ApplicationUser>? LikedBy { get; set; }
+    public ICollection<ApplicationUser>? DislikedBy { get; set; }
 }

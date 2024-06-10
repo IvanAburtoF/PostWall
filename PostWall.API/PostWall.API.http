@@ -1,0 +1,6 @@
+@PostWall.API_HostAddress = http://localhost:5287
+
+GET {{PostWall.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

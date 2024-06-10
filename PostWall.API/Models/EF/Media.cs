@@ -1,4 +1,4 @@
-﻿namespace PostWall.Data.Models;
+﻿namespace PostWall.API.Models.EF;
 
 public class Media
 {
