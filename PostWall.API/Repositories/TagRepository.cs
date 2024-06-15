@@ -1,55 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using PostWall.API.Models.EF;
-using PostWall.Data;
+﻿using PostWall.API.Models.EF;
+
 namespace PostWall.API.Repositories;
 
 public class TagRepository : ITagRepository
 {
-    private readonly PostWallDbContext _postWallDbContext;
-
-    public TagRepository(PostWallDbContext postWallDbContext)
+    public Task<Tag> CreateTagAsync(Tag tag)
     {
-        _postWallDbContext = postWallDbContext;
+        throw new NotImplementedException();
     }
 
-    public async Task<Tag> CreateTagAsync(Tag tag)
+    public Task DeleteTagAsync(int id)
     {
-        var tag = _mapper.Map<Tag>(tag);
-        await _postWallDbContext.Tags.AddAsync(tag);
-        await _postWallDbContext.SaveChangesAsync();
-        return _mapper.Map<Tag>(tag);
+        throw new NotImplementedException();
     }
 
-    public async Task<Tag> GetTagByIdAsync(int id)
+    public Task<Tag> GetTagByIdAsync(int id)
     {
-        var tag = await _postWallDbContext.Tags
-            .FirstOrDefaultAsync(t => t.Id == id);
-        return _mapper.Map<Tag>(tag);
+        throw new NotImplementedException();
     }
 
-    public async Task<IEnumerable<Tag>> GetTagsAsync()
+    public Task<IEnumerable<Tag>> GetTagsAsync()
     {
-        var tags = await _postWallDbContext.Tags
-            .ToListAsync();
-        return _mapper.Map<IEnumerable<Tag>>(tags);
+        throw new NotImplementedException();
     }
 
-    public async Task<Tag> UpdateTagAsync(Tag tag)
+    public Task<Tag> UpdateTagAsync(Tag tag)
     {
-        var tag = _mapper.Map<Tag>(tag);
-        _postWallDbContext.Tags.Update(tag);
-        await _postWallDbContext.SaveChangesAsync();
-        return _mapper.Map<Tag>(tag);
-    }
-
-    public async Task DeleteTagAsync(int id)
-    {
-        var tag = await _postWallDbContext.Tags.FindAsync(id);
-        if (tag == null)
-        {
-            throw new Exception("Tag not found");
-        }
-        _postWallDbContext.Tags.Remove(tag);
-        await _postWallDbContext.SaveChangesAsync();
+        throw new NotImplementedException();
     }
 }

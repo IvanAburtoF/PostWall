@@ -1,59 +1,47 @@
 ﻿using AutoMapper;
-using PostWall.API.Models.DTO;
+using PostWall.API.Models.DTO.Post;
 using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
-using System.Transactions;
 namespace PostWall.API.Services;
 
-public class PostService
+public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
-    private readonly IMediaRepository _mediaRepository;
     private readonly IMapper _mapper;
 
-    public PostService(IPostRepository postRepository,IMediaRepository mediaRepository, IMapper mapper)
+    public PostService(IPostRepository postRepository, IMapper mapper)
     {
         _postRepository = postRepository;
-        _mediaRepository = mediaRepository;
         _mapper = mapper;
     }
 
-    public async Task<PostDTO> CreatePostAsync(PostDTO postDTO)
+    public async Task<PostDetailsDTO> CreatePostAsync(CreatePostDTO postDTO, string userId)
     {
-        using var transaction = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
         try
         {
-            // Insert the media
-            var media = _mapper.Map<Media>(postDTO.Media);
-            media = await _mediaRepository.CreateMediaAsync(media);
-
-            // Insert the post
             var post = _mapper.Map<Post>(postDTO);
-            post.Media.Id = media.Id;
+            post.UserId = userId;
             post = await _postRepository.CreatePostAsync(post);
-
-            // Commit the transaction
-            transaction.Complete();
-
-            return _mapper.Map<PostDTO>(post);
+            return _mapper.Map<PostDetailsDTO>(post);
         }
         catch (AutoMapperMappingException ex)
         {
+
             throw new Exception("Error Mapping post", ex);
         }
         catch (Exception ex)
         {
+
             throw new Exception("Error creating post", ex);
         }
     }
 
-    public async Task<PostDTO> GetPostByIdAsync(int id)
+    public async Task<PostDetailsDTO> GetPostByIdAsync(int id)
     {
         try
         {
             var post = await _postRepository.GetPostByIdAsync(id);
-            return _mapper.Map<PostDTO>(post);
+            return _mapper.Map<PostDetailsDTO>(post);
         }
         catch (AutoMapperMappingException ex)
         {
@@ -65,12 +53,12 @@ public class PostService
         }
     }
 
-    public async Task<IEnumerable<PostDTO>> GetPostsAsync()
+    public async Task<IEnumerable<PostListDTO>> GetPostsAsync()
     {
         try
         {
             var posts = await _postRepository.GetPostsAsync();
-            return _mapper.Map<IEnumerable<PostDTO>>(posts);
+            return _mapper.Map<IEnumerable<PostListDTO>>(posts);
         }
         catch (AutoMapperMappingException ex)
         {
@@ -82,13 +70,13 @@ public class PostService
         }
     }
 
-    public async Task<PostDTO> UpdatePostAsync(PostDTO postDTO)
+    public async Task<PostDetailsDTO> UpdatePostAsync(UpdatePostDTO postDTO)
     {
         try
         {
             var post = _mapper.Map<Post>(postDTO);
             post = await _postRepository.UpdatePostAsync(post);
-            return _mapper.Map<PostDTO>(post);
+            return _mapper.Map<PostDetailsDTO>(post);
         }
         catch (AutoMapperMappingException ex)
         {

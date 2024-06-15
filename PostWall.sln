@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.9.34728.123
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostWall.WEB", "PostWall.WEB\PostWall.WEB.csproj", "{A19ADDBF-C467-4B31-BB1B-B48F95AFB68E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PostWall.API", "PostWall.API\PostWall.API.csproj", "{F5548F76-C0A2-46C4-AFA4-A1977A09D4C0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostWall.API", "PostWall.API\PostWall.API.csproj", "{F5548F76-C0A2-46C4-AFA4-A1977A09D4C0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A19ADDBF-C467-4B31-BB1B-B48F95AFB68E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A19ADDBF-C467-4B31-BB1B-B48F95AFB68E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A19ADDBF-C467-4B31-BB1B-B48F95AFB68E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A19ADDBF-C467-4B31-BB1B-B48F95AFB68E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F5548F76-C0A2-46C4-AFA4-A1977A09D4C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F5548F76-C0A2-46C4-AFA4-A1977A09D4C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5548F76-C0A2-46C4-AFA4-A1977A09D4C0}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -1,4 +1,5 @@
-﻿using PostWall.API.Models.EF;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using PostWall.API.Models.EF;
 
 namespace PostWall.API.Repositories
 {
@@ -9,5 +10,8 @@ namespace PostWall.API.Repositories
         Task<Post> GetPostByIdAsync(int id);
         Task<IEnumerable<Post>> GetPostsAsync();
         Task<Post> UpdatePostAsync(Post post);
+        IDbContextTransaction BeginTransaction();
+        void CommitTransaction();
+        void RollbackTransaction();
     }
 }

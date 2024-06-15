@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using PostWall.API.Models.EF;
 using PostWall.Data;
 using System.Data.Common;
@@ -37,6 +38,9 @@ public class PostRepository : IPostRepository
         {
             var post = await _postWallDbContext.Posts
                 .Include(p => p.ApplicationUser)
+                .Include(p => p.Comments)
+                .ThenInclude(c => c.ApplicationUser)
+                .Include(p => p.Media)
                 .FirstOrDefaultAsync(p => p.Id == id);
             return post ?? throw new Exception("Post not found");
         }
@@ -95,5 +99,20 @@ public class PostRepository : IPostRepository
         {
             throw new Exception("Error deleting post", ex);
         }
+    }
+
+    public IDbContextTransaction BeginTransaction()
+    {
+        return _postWallDbContext.Database.BeginTransaction();
+    }
+
+    public void CommitTransaction()
+    {
+        _postWallDbContext.Database.CommitTransaction();
+    }
+
+    public void RollbackTransaction()
+    {
+        _postWallDbContext.Database.RollbackTransaction();
     }
 }

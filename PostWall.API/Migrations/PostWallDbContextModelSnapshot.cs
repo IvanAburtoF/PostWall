@@ -29,7 +29,7 @@ namespace PostWall.API.Migrations
 
                     b.HasIndex("LikedCommentsId");
 
-                    b.ToTable("LikedComments", (string)null);
+                    b.ToTable("ApplicationUserComment", (string)null);
                 });
 
             modelBuilder.Entity("ApplicationUserComment1", b =>
@@ -44,7 +44,7 @@ namespace PostWall.API.Migrations
 
                     b.HasIndex("DislikedCommentsId");
 
-                    b.ToTable("DislikedComments", (string)null);
+                    b.ToTable("ApplicationUserComment1", (string)null);
                 });
 
             modelBuilder.Entity("ApplicationUserPost", b =>
@@ -59,7 +59,7 @@ namespace PostWall.API.Migrations
 
                     b.HasIndex("LikedPostsId");
 
-                    b.ToTable("LikedPosts", (string)null);
+                    b.ToTable("ApplicationUserPost", (string)null);
                 });
 
             modelBuilder.Entity("ApplicationUserPost1", b =>
@@ -74,7 +74,7 @@ namespace PostWall.API.Migrations
 
                     b.HasIndex("DislikedPostsId");
 
-                    b.ToTable("DislikedPosts", (string)null);
+                    b.ToTable("ApplicationUserPost1", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -217,7 +217,7 @@ namespace PostWall.API.Migrations
 
                     b.HasIndex("TagsId");
 
-                    b.ToTable("PostTag");
+                    b.ToTable("PostTag", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.API.Models.EF.Comment", b =>
@@ -225,10 +225,6 @@ namespace PostWall.API.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -256,11 +252,11 @@ namespace PostWall.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("PostId");
 
-                    b.ToTable("Comments");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.API.Models.EF.Media", b =>
@@ -284,7 +280,7 @@ namespace PostWall.API.Migrations
                     b.HasIndex("PostId")
                         .IsUnique();
 
-                    b.ToTable("Media");
+                    b.ToTable("Media", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.API.Models.EF.Post", b =>
@@ -292,10 +288,6 @@ namespace PostWall.API.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
@@ -319,9 +311,9 @@ namespace PostWall.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("Posts");
+                    b.ToTable("Posts", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.API.Models.EF.Report", b =>
@@ -329,10 +321,6 @@ namespace PostWall.API.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ApplicationUserId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<int>("CommentId")
                         .HasColumnType("INTEGER");
@@ -356,13 +344,13 @@ namespace PostWall.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
                     b.HasIndex("CommentId");
 
                     b.HasIndex("PostId");
 
-                    b.ToTable("Reports");
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Reports", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.API.Models.EF.Tag", b =>
@@ -377,7 +365,7 @@ namespace PostWall.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Tags");
+                    b.ToTable("Tags", (string)null);
                 });
 
             modelBuilder.Entity("PostWall.Data.ApplicationUser", b =>
@@ -576,15 +564,15 @@ namespace PostWall.API.Migrations
 
             modelBuilder.Entity("PostWall.API.Models.EF.Comment", b =>
                 {
-                    b.HasOne("PostWall.Data.ApplicationUser", "ApplicationUser")
-                        .WithMany("Comments")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PostWall.API.Models.EF.Post", "Post")
                         .WithMany("Comments")
                         .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PostWall.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("Comments")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -608,7 +596,7 @@ namespace PostWall.API.Migrations
                 {
                     b.HasOne("PostWall.Data.ApplicationUser", "ApplicationUser")
                         .WithMany("Posts")
-                        .HasForeignKey("ApplicationUserId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -617,12 +605,6 @@ namespace PostWall.API.Migrations
 
             modelBuilder.Entity("PostWall.API.Models.EF.Report", b =>
                 {
-                    b.HasOne("PostWall.Data.ApplicationUser", "ApplicationUser")
-                        .WithMany("Reports")
-                        .HasForeignKey("ApplicationUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("PostWall.API.Models.EF.Comment", "Comment")
                         .WithMany("Reports")
                         .HasForeignKey("CommentId")
@@ -632,6 +614,12 @@ namespace PostWall.API.Migrations
                     b.HasOne("PostWall.API.Models.EF.Post", null)
                         .WithMany("Reports")
                         .HasForeignKey("PostId");
+
+                    b.HasOne("PostWall.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("Reports")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("ApplicationUser");
 

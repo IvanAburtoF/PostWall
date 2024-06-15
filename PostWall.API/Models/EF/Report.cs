@@ -1,6 +1,4 @@
-﻿using PostWall.Data;
-
-namespace PostWall.API.Models.EF;
+﻿namespace PostWall.API.Models.EF;
 
 public class Report
 {

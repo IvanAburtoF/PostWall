@@ -1,13 +1,13 @@
-﻿using PostWall.API.Models.DTO;
+﻿using PostWall.API.Models.DTO.Comment;
 
 namespace PostWall.API.Services
 {
     public interface ICommentService
     {
-        Task<CommentDTO> CreateCommentAsync(CommentDTO commentDTO);
+        Task<CommentDetailsDTO> CreateCommentAsync(CommentDetailsDTO commentDTO);
         Task DeleteCommentAsync(int id);
-        Task<CommentDTO> GetCommentByIdAsync(int id);
-        Task<IEnumerable<CommentDTO>> GetCommentsAsync();
-        Task<CommentDTO> UpdateCommentAsync(CommentDTO commentDTO);
+        Task<CommentDetailsDTO> GetCommentByIdAsync(int id);
+        Task<IEnumerable<CommentDetailsDTO>> GetCommentsAsync();
+        Task<CommentDetailsDTO> UpdateCommentAsync(CommentDetailsDTO commentDTO);
     }
 }

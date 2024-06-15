@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using PostWall.API.Models.DTO;
+using PostWall.API.Models.DTO.Comment;
 using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
 
@@ -16,13 +16,13 @@ public class CommentService : ICommentService
         _mapper = mapper;
     }
 
-    public async Task<CommentDTO> CreateCommentAsync(CommentDTO commentDTO)
+    public async Task<CommentDetailsDTO> CreateCommentAsync(CommentDetailsDTO commentDTO)
     {
         try
         {
             var comment = _mapper.Map<Comment>(commentDTO);
             comment = await _commentRepository.CreateCommentAsync(comment);
-            return _mapper.Map<CommentDTO>(comment);
+            return _mapper.Map<CommentDetailsDTO>(comment);
         }
         catch (AutoMapperMappingException ex)
         {
@@ -34,12 +34,12 @@ public class CommentService : ICommentService
         }
     }
 
-    public async Task<CommentDTO> GetCommentByIdAsync(int id)
+    public async Task<CommentDetailsDTO> GetCommentByIdAsync(int id)
     {
         try
         {
             var comment = await _commentRepository.GetCommentByIdAsync(id);
-            return _mapper.Map<CommentDTO>(comment);
+            return _mapper.Map<CommentDetailsDTO>(comment);
         }
         catch (AutoMapperMappingException ex)
         {
@@ -51,12 +51,12 @@ public class CommentService : ICommentService
         }
     }
 
-    public async Task<IEnumerable<CommentDTO>> GetCommentsAsync()
+    public async Task<IEnumerable<CommentDetailsDTO>> GetCommentsAsync()
     {
         try
         {
             var comments = await _commentRepository.GetCommentsAsync();
-            return _mapper.Map<IEnumerable<CommentDTO>>(comments);
+            return _mapper.Map<IEnumerable<CommentDetailsDTO>>(comments);
         }
         catch (AutoMapperMappingException ex)
         {
@@ -68,13 +68,13 @@ public class CommentService : ICommentService
         }
     }
 
-    public async Task<CommentDTO> UpdateCommentAsync(CommentDTO commentDTO)
+    public async Task<CommentDetailsDTO> UpdateCommentAsync(CommentDetailsDTO commentDTO)
     {
         try
         {
             var comment = _mapper.Map<Comment>(commentDTO);
             comment = await _commentRepository.UpdateCommentAsync(comment);
-            return _mapper.Map<CommentDTO>(comment);
+            return _mapper.Map<CommentDetailsDTO>(comment);
         }
         catch (AutoMapperMappingException ex)
         {

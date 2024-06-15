@@ -1,48 +1,93 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using PostWall.API.Models.DTO;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using PostWall.API.Models.DTO.Post;
 using PostWall.API.Services;
+using System.Security.Claims;
 namespace PostWall.API.Controllers;
 
-[ApiController]
 [Route("api/[controller]")]
+[Authorize]
+[ApiController]
+[Produces("application/json")]
+[Consumes("application/json")]
 public class PostController : ControllerBase
 {
-    private readonly PostService _postService;
+    private readonly IPostService _postService;
 
-    public PostController(PostService postService)
+    public PostController(IPostService postService)
     {
         _postService = postService;
     }
 
     [HttpPost]
-
-    public async Task<ActionResult<PostDTO>> CreatePostAsync(PostDTO postDTO)
+    public async Task<ActionResult<PostDetailsDTO>> CreatePostAsync(CreatePostDTO postDTO)
     {
-        var post = await _postService.CreatePostAsync(postDTO);
-        return CreatedAtAction(nameof(GetPostByIdAsync), new { id = post.Id }, post);
+        try
+        {
+            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+            {
+                return Unauthorized();
+            }
+            var post = await _postService.CreatePostAsync(postDTO, userID);
+            return CreatedAtAction(nameof(GetPostByIdAsync), new { id = post.Id }, post);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
+
     [HttpGet("{id}")]
-    public async Task<ActionResult<PostDTO>> GetPostByIdAsync(int id)
+    public async Task<ActionResult<PostDetailsDTO>> GetPostByIdAsync(int id)
     {
-        var post = await _postService.GetPostByIdAsync(id);
-        return Ok(post);
+        try
+        {
+            var post = await _postService.GetPostByIdAsync(id);
+            return Ok(post);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostDTO>>> GetPostsAsync()
+    public async Task<ActionResult<IEnumerable<PostListDTO>>> GetPostsAsync()
     {
-        var posts = await _postService.GetPostsAsync();
-        return Ok(posts);
+        try
+        {
+            var posts = await _postService.GetPostsAsync();
+            return Ok(posts);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
     [HttpPut]
-    public async Task<ActionResult<PostDTO>> UpdatePostAsync(PostDTO postDTO)
+    public async Task<ActionResult<PostDetailsDTO>> UpdatePostAsync(UpdatePostDTO postDTO)
     {
-        var post = await _postService.UpdatePostAsync(postDTO);
-        return Ok(post);
+        try
+        {
+            var post = await _postService.UpdatePostAsync(postDTO);
+            return Ok(post);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeletePostAsync(int id)
     {
-        await _postService.DeletePostAsync(id);
-        return NoContent();
+        try
+        {
+            await _postService.DeletePostAsync(id);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
     }
 }

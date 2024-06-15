@@ -19,34 +19,36 @@ namespace PostWall.Data
             modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(a => a.UserName)
                 .IsUnique();
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(a => a.Posts)
-                .WithOne(p => p.ApplicationUser)
+            modelBuilder.Entity<Post>()
+                .HasOne(p => p.ApplicationUser)
+                .WithMany(a => a.Posts)
+                .HasForeignKey(p => p.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(a => a.Comments)
-                .WithOne(c => c.ApplicationUser)
+            modelBuilder.Entity<Comment>()
+                .HasOne(c => c.ApplicationUser)
+                .WithMany(a => a.Comments)
+                .HasForeignKey(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(a => a.Reports)
-                .WithOne(r => r.ApplicationUser)
+            modelBuilder.Entity<Report>()
+                .HasOne(r => r.ApplicationUser)
+                .WithMany(a => a.Reports)
+                .HasForeignKey(r => r.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Post>()
+                .HasMany(p => p.Tags)
+                .WithMany(t => t.Posts);
             modelBuilder.Entity<ApplicationUser>()
                 .HasMany(a => a.LikedPosts)
-                .WithMany(p => p.LikedBy)
-                .UsingEntity(j => j.ToTable("LikedPosts"));
+                .WithMany(p => p.LikedBy);
             modelBuilder.Entity<ApplicationUser>()
                 .HasMany(a => a.DislikedPosts)
-                .WithMany(p => p.DislikedBy)
-                .UsingEntity(j => j.ToTable("DislikedPosts"));
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(a => a.LikedComments)
-                .WithMany(c => c.LikedBy)
-                .UsingEntity(j => j.ToTable("LikedComments"));
-            modelBuilder.Entity<ApplicationUser>()
-                .HasMany(a => a.DislikedComments)
-                .WithMany(c => c.DislikedBy)
-                .UsingEntity(j => j.ToTable("DislikedComments"));
+                .WithMany(p => p.DislikedBy);
+            modelBuilder.Entity<Comment>()
+                .HasMany(c => c.LikedBy)
+                .WithMany(a => a.LikedComments);
+            modelBuilder.Entity<Comment>()
+                .HasMany(c => c.DislikedBy)
+                .WithMany(a => a.DislikedComments);
         }
     }
 }

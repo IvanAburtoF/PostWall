@@ -1,9 +1,7 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using PostWall.API.Models.EF;
 using System.ComponentModel.DataAnnotations;
 
-namespace PostWall.Data;
+namespace PostWall.API.Models.EF;
 
 // Add profile data for application users by adding properties to the ApplicationUser class
 public class ApplicationUser : IdentityUser
