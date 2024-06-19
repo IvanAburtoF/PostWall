@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using PostWall.API.Models.DTO.Post;
 using PostWall.API.Services;
@@ -6,7 +7,6 @@ using System.Security.Claims;
 namespace PostWall.API.Controllers;
 
 [Route("api/[controller]")]
-[Authorize]
 [ApiController]
 [Produces("application/json")]
 [Consumes("application/json")]
@@ -19,9 +19,20 @@ public class PostController : ControllerBase
         _postService = postService;
     }
 
+    [Authorize]
     [HttpPost]
-    public async Task<ActionResult<PostDetailsDTO>> CreatePostAsync(CreatePostDTO postDTO)
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status418ImATeapot)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PostDetailsDTO>> CreatePost(CreatePostDTO postDTO)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         try
         {
             var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -30,16 +41,18 @@ public class PostController : ControllerBase
                 return Unauthorized();
             }
             var post = await _postService.CreatePostAsync(postDTO, userID);
-            return CreatedAtAction(nameof(GetPostByIdAsync), new { id = post.Id }, post);
+            return CreatedAtAction(nameof(GetPostById), new { id = post.Id }, post);
         }
         catch (Exception ex)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
-
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PostDetailsDTO>> GetPostByIdAsync(int id)
+    [HttpGet ("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PostDetailsDTO>> GetPostById(int id)
     {
         try
         {
@@ -52,7 +65,10 @@ public class PostController : ControllerBase
         }
     }
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PostListDTO>>> GetPostsAsync()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<IEnumerable<PostListDTO>>> GetPosts()
     {
         try
         {
@@ -64,12 +80,25 @@ public class PostController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+    [Authorize]
     [HttpPut]
-    public async Task<ActionResult<PostDetailsDTO>> UpdatePostAsync(UpdatePostDTO postDTO)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<PostDetailsDTO>> UpdatePost(UpdatePostDTO postDTO)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
         try
         {
-            var post = await _postService.UpdatePostAsync(postDTO);
+            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+            {
+                return Unauthorized();
+            }
+            var post = await _postService.UpdatePostAsync(postDTO, userID);
             return Ok(post);
         }
         catch (Exception ex)
@@ -77,12 +106,21 @@ public class PostController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+    [Authorize]
     [HttpDelete("{id}")]
-    public async Task<ActionResult> DeletePostAsync(int id)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]    
+    public async Task<ActionResult> DeletePost(int id)
     {
         try
         {
-            await _postService.DeletePostAsync(id);
+            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+            {
+                return Unauthorized();
+            }
+            await _postService.DeletePostAsync(id, userID);
             return NoContent();
         }
         catch (Exception ex)

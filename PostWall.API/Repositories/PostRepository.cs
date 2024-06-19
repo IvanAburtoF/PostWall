@@ -56,6 +56,7 @@ public class PostRepository : IPostRepository
         {
             var posts = await _postWallDbContext.Posts
                 .Include(p => p.ApplicationUser)
+                .Include(p => p.Media)
                 .ToListAsync();
             return posts;
 
@@ -101,18 +102,28 @@ public class PostRepository : IPostRepository
         }
     }
 
-    public IDbContextTransaction BeginTransaction()
+    public async Task LikePostAsync(int id, string userId)
     {
-        return _postWallDbContext.Database.BeginTransaction();
+        ArgumentNullException.ThrowIfNull(id);
+        ArgumentNullException.ThrowIfNull(userId);
+        try
+        {
+            var post = await _postWallDbContext.Posts.FindAsync(id);
+            if (post == null)
+            {
+                throw new Exception("Post not found");
+            }
+            post.LikedBy.Add(new ApplicationUser { Id = userId });
+            await _postWallDbContext.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex)
+        {
+            throw new Exception("Error liking post", ex);
+        }
     }
 
-    public void CommitTransaction()
+    public async Task DislikePostAsync(int id, string userId)
     {
-        _postWallDbContext.Database.CommitTransaction();
-    }
-
-    public void RollbackTransaction()
-    {
-        _postWallDbContext.Database.RollbackTransaction();
+        throw new NotImplementedException();
     }
 }

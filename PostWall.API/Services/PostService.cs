@@ -70,7 +70,7 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<PostDetailsDTO> UpdatePostAsync(UpdatePostDTO postDTO)
+    public async Task<PostDetailsDTO> UpdatePostAsync(UpdatePostDTO postDTO, string userId)
     {
         try
         {
@@ -88,7 +88,7 @@ public class PostService : IPostService
         }
     }
 
-    public async Task DeletePostAsync(int id)
+    public async Task DeletePostAsync(int id, string userId)
     {
         try
         {
@@ -97,6 +97,50 @@ public class PostService : IPostService
         catch (Exception ex)
         {
             throw new Exception("Error deleting post", ex);
+        }
+    }
+
+    public async Task LikePostAsync(int id, string userId)
+    {
+        try
+        {
+            var post =await _postRepository.GetPostByIdAsync(id);
+            if(post == null)
+            {
+                throw new Exception("Post not found");
+            }
+            /*maybe i should allow the owner to like his own post
+            for testing i need it
+            if(post.UserId == userId)
+            {
+                throw new Exception("You can't like your own post");
+            }*/
+            if(post.LikedBy.Any(l => l.Id == userId))
+            {
+              return;
+            }
+            if(post.DislikedBy.Any(l => l.Id == userId))
+            {
+                post.DislikedBy.Remove(post.DislikedBy.First(l => l.Id == userId));
+            }
+
+            await _postRepository.LikePostAsync(id, userId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error liking post", ex);
+        }
+    }
+
+    public async Task DislikePostAsync(int id, string userId)
+    {
+        try
+        {
+            await _postRepository.DislikePostAsync(id, userId);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("Error disliking post", ex);
         }
     }
 }

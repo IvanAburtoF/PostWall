@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
 using PostWall.API.Services;
@@ -28,18 +29,22 @@ public class Program
             .AddEntityFrameworkStores<PostWallDbContext>()
             .AddDefaultTokenProviders();
 
-        builder.Services.AddAuthentication(options =>
+        builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie(options =>
         {
-            options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-        }).AddCookie(options =>
-        {
-            options.Cookie.HttpOnly = true;
             options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+            options.ForwardSignIn = "/Account/help";
+            options.Events = new CookieAuthenticationEvents
+            {
+                OnRedirectToLogin = context =>
+                {
+                    context.Response.StatusCode = 401;
+                    return Task.CompletedTask;
+                }
+            };
+            Console.WriteLine("did this work?");
         }
         );
-        builder.Services.AddAuthorization();
 
 
         builder.Services.AddAutoMapper(typeof(Program).Assembly);

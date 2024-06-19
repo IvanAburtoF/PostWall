@@ -10,8 +10,7 @@ namespace PostWall.API.Repositories
         Task<Post> GetPostByIdAsync(int id);
         Task<IEnumerable<Post>> GetPostsAsync();
         Task<Post> UpdatePostAsync(Post post);
-        IDbContextTransaction BeginTransaction();
-        void CommitTransaction();
-        void RollbackTransaction();
+        Task LikePostAsync(int id, string userId);
+        Task DislikePostAsync(int id, string userId);
     }
 }
