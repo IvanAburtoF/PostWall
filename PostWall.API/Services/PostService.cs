@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PostWall.API.Models.DTO.Post;
 using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
@@ -53,12 +54,18 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<IEnumerable<PostListDTO>> GetPostsAsync()
+    public async Task<IEnumerable<PostListDTO>> GetPostsAsync(int pageNumber =1 , int pageSize =9)
     {
+        //min page number is 1
+        pageNumber = Math.Max(pageNumber, 1);
+        //max page size is 10
+        pageSize = Math.Clamp(pageSize, 1, 10);
         try
         {
-            var posts = await _postRepository.GetPostsAsync();
-            return _mapper.Map<IEnumerable<PostListDTO>>(posts);
+            IQueryable<Post> posts = (IQueryable<Post>)_postRepository.GetPostsAsync();
+        posts = posts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            return _mapper.Map<IEnumerable<PostListDTO>>(posts);        
+        
         }
         catch (AutoMapperMappingException ex)
         {
