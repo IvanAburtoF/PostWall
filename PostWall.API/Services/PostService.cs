@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using PostWall.API.Models.DTO.Post;
 using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
@@ -8,6 +7,7 @@ namespace PostWall.API.Services;
 public class PostService : IPostService
 {
     private readonly IPostRepository _postRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
     public PostService(IPostRepository postRepository, IMapper mapper)
@@ -54,7 +54,7 @@ public class PostService : IPostService
         }
     }
 
-    public async Task<IEnumerable<PostListDTO>> GetPostsAsync(int pageNumber =1 , int pageSize =9)
+    public async Task<IEnumerable<PostListDTO>> GetPostsAsync(int pageNumber = 1, int pageSize = 9)
     {
         //min page number is 1
         pageNumber = Math.Max(pageNumber, 1);
@@ -63,9 +63,9 @@ public class PostService : IPostService
         try
         {
             IQueryable<Post> posts = (IQueryable<Post>)_postRepository.GetPostsAsync();
-        posts = posts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
-            return _mapper.Map<IEnumerable<PostListDTO>>(posts);        
-        
+            posts = posts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+            return _mapper.Map<IEnumerable<PostListDTO>>(posts);
+
         }
         catch (AutoMapperMappingException ex)
         {
@@ -111,27 +111,26 @@ public class PostService : IPostService
     {
         try
         {
-            var post =await _postRepository.GetPostByIdAsync(id);
-            if(post == null)
+            var post = await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
             {
                 throw new Exception("Post not found");
             }
-            /*maybe i should allow the owner to like his own post
-            for testing i need it
-            if(post.UserId == userId)
+
+            var userLiked = post.LikedBy.Any(u => u.Id == userId);
+            if (userLiked)
             {
-                throw new Exception("You can't like your own post");
-            }*/
-            if(post.LikedBy.Any(l => l.Id == userId))
-            {
-              return;
+                var user = post.LikedBy.First(u => u.Id == userId);
+                post.LikedBy.Remove(user);
             }
-            if(post.DislikedBy.Any(l => l.Id == userId))
+            else
             {
-                post.DislikedBy.Remove(post.DislikedBy.First(l => l.Id == userId));
+                var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new Exception("User not found");
+
+                post.LikedBy.Add(user);
             }
 
-            await _postRepository.LikePostAsync(id, userId);
+            await _postRepository.UpdatePostAsync(post);
         }
         catch (Exception ex)
         {
@@ -143,7 +142,34 @@ public class PostService : IPostService
     {
         try
         {
-            await _postRepository.DislikePostAsync(id, userId);
+            var post = await _postRepository.GetPostByIdAsync(id);
+            if (post == null)
+            {
+                throw new Exception("Post not found");
+            }
+
+            bool userDisliked = post.DislikedBy.Any(u => u.Id == userId);
+            bool userLiked = post.LikedBy.Any(u => u.Id == userId);
+            if(userLiked)
+            {
+                var user = post.LikedBy.First(u => u.Id == userId);
+                post.LikedBy.Remove(user);
+            }
+            if (userDisliked)
+            {
+                var user = post.DislikedBy.First(u => u.Id == userId);
+                post.DislikedBy.Remove(user);
+            }
+            else
+            {
+                // If the user hasn't disliked the post, add a new dislike
+                // This assumes you have a method to retrieve the user by ID
+                var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new Exception("User not found");
+
+                post.DislikedBy.Add(user);
+            }
+
+            await _postRepository.UpdatePostAsync(post);
         }
         catch (Exception ex)
         {

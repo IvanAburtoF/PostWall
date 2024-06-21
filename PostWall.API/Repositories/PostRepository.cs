@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using PostWall.API.Models.EF;
 using PostWall.Data;
 using System.Data.Common;
@@ -100,30 +99,5 @@ public class PostRepository : IPostRepository
         {
             throw new Exception("Error deleting post", ex);
         }
-    }
-
-    public async Task LikePostAsync(int id, string userId)
-    {
-        ArgumentNullException.ThrowIfNull(id);
-        ArgumentNullException.ThrowIfNull(userId);
-        try
-        {
-            var post = await _postWallDbContext.Posts.FindAsync(id);
-            if (post == null)
-            {
-                throw new Exception("Post not found");
-            }
-            post.LikedBy.Add(new ApplicationUser { Id = userId });
-            await _postWallDbContext.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new Exception("Error liking post", ex);
-        }
-    }
-
-    public async Task DislikePostAsync(int id, string userId)
-    {
-        throw new NotImplementedException();
     }
 }

@@ -4,7 +4,6 @@ using PostWall.API.Models.EF;
 using PostWall.API.Repositories;
 using PostWall.API.Services;
 using PostWall.Data;
-using System.Text.Json.Serialization;
 namespace PostWall.API;
 
 public class Program
@@ -38,17 +37,17 @@ public class Program
         {
             options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
             options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-            options.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+            options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
         })
         .AddCookie(IdentityConstants.ApplicationScheme, options =>
         {
-            // configure events to return 401 instead of redirecting to login
+            options.Cookie.Name = "PostWall.Cookie";
+            options.ExpireTimeSpan = TimeSpan.FromMinutes(20);
             options.Events.OnRedirectToLogin = context =>
             {
                 context.Response.StatusCode = 401;
                 return Task.CompletedTask;
             };
-            //configure events to return 403 instead of redirecting to access denied
             options.Events.OnRedirectToAccessDenied = context =>
             {
                 context.Response.StatusCode = 403;

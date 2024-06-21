@@ -1,16 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-using PostWall.API.Models.EF;
+﻿using PostWall.API.Models.EF;
 
-namespace PostWall.API.Repositories
+namespace PostWall.API.Repositories;
+
+public interface IPostRepository
 {
-    public interface IPostRepository
-    {
-        Task<Post> CreatePostAsync(Post post);
-        Task DeletePostAsync(int id);
-        Task<Post> GetPostByIdAsync(int id);
-        Task<IEnumerable<Post>> GetPostsAsync();
-        Task<Post> UpdatePostAsync(Post post);
-        Task LikePostAsync(int id, string userId);
-        Task DislikePostAsync(int id, string userId);
-    }
+    Task<Post> CreatePostAsync(Post post);
+    Task DeletePostAsync(int id);
+    Task<Post> GetPostByIdAsync(int id);
+    Task<IEnumerable<Post>> GetPostsAsync();
+    Task<Post> UpdatePostAsync(Post post);
 }

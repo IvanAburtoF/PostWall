@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 using PostWall.API.Models.EF;
 using PostWall.Data;
 namespace PostWall.API.Repositories;

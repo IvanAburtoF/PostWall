@@ -129,4 +129,48 @@ public class PostController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
+    [Authorize]
+    [HttpPost("{postId}/like")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> LikePost(int postId)
+    {
+        try
+        {
+            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+            {
+                return Unauthorized();
+            }
+            await _postService.LikePostAsync(postId, userID);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
+    [Authorize]
+    [HttpPost("{postId}/dislike")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult> DislikePost(int postId)
+    {
+        try
+        {
+            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userID == null)
+            {
+                return Unauthorized();
+            }
+            await _postService.DislikePostAsync(postId, userID);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+        }
+    }
 }
