@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /PostWall.Data/PostWall.Data.csproj
+/PostWall.API/PostWall.db
+/PostWall.API/PostWall.db-shm
+/PostWall.API/PostWall.db-wal
