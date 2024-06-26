@@ -16,7 +16,7 @@ public class CommentService : ICommentService
         _mapper = mapper;
     }
 
-    public async Task<CommentDetailsDTO> CreateCommentAsync(CommentDetailsDTO commentDTO)
+    public async Task<CommentDetailsDTO> CreateCommentAsync(CreateCommentDTO commentDTO, string userId)
     {
         try
         {
@@ -68,25 +68,7 @@ public class CommentService : ICommentService
         }
     }
 
-    public async Task<CommentDetailsDTO> UpdateCommentAsync(CommentDetailsDTO commentDTO)
-    {
-        try
-        {
-            var comment = _mapper.Map<Comment>(commentDTO);
-            comment = await _commentRepository.UpdateCommentAsync(comment);
-            return _mapper.Map<CommentDetailsDTO>(comment);
-        }
-        catch (AutoMapperMappingException ex)
-        {
-            throw new Exception("Error Mapping comment", ex);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Error updating comment", ex);
-        }
-    }
-
-    public async Task DeleteCommentAsync(int id)
+    public async Task DeleteCommentAsync(int id, string userId)
     {
         try
         {

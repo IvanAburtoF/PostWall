@@ -10,9 +10,10 @@ public class PostService : IPostService
     private readonly IUserRepository _userRepository;
     private readonly IMapper _mapper;
 
-    public PostService(IPostRepository postRepository, IMapper mapper)
+    public PostService(IPostRepository postRepository, IUserRepository userRepository, IMapper mapper)
     {
         _postRepository = postRepository;
+        _userRepository = userRepository;
         _mapper = mapper;
     }
 
@@ -62,7 +63,7 @@ public class PostService : IPostService
         pageSize = Math.Clamp(pageSize, 1, 10);
         try
         {
-            IQueryable<Post> posts = (IQueryable<Post>)_postRepository.GetPostsAsync();
+            IQueryable<Post> posts = (await _postRepository.GetPostsAsync()).AsQueryable();
             posts = posts.Skip((pageNumber - 1) * pageSize).Take(pageSize);
             return _mapper.Map<IEnumerable<PostListDTO>>(posts);
 
@@ -162,8 +163,6 @@ public class PostService : IPostService
             }
             else
             {
-                // If the user hasn't disliked the post, add a new dislike
-                // This assumes you have a method to retrieve the user by ID
                 var user = await _userRepository.GetUserByIdAsync(userId) ?? throw new Exception("User not found");
 
                 post.DislikedBy.Add(user);

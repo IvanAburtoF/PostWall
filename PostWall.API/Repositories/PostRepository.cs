@@ -40,6 +40,8 @@ public class PostRepository : IPostRepository
                 .Include(p => p.Comments)
                 .ThenInclude(c => c.ApplicationUser)
                 .Include(p => p.Media)
+                .Include(p => p.LikedBy)
+                .Include(p => p.LikedBy)
                 .FirstOrDefaultAsync(p => p.Id == id);
             return post ?? throw new Exception("Post not found");
         }

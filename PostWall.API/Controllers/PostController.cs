@@ -13,10 +13,12 @@ namespace PostWall.API.Controllers;
 public class PostController : ControllerBase
 {
     private readonly IPostService _postService;
+    private readonly IUserService _userService;
 
-    public PostController(IPostService postService)
+    public PostController(IPostService postService, IUserService userService)
     {
         _postService = postService;
+        _userService = userService;
     }
 
     [Authorize]
@@ -35,7 +37,7 @@ public class PostController : ControllerBase
         }
         try
         {
-            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userID = _userService.GetCurrentUserId();
             if (userID == null)
             {
                 return Unauthorized();
@@ -94,7 +96,7 @@ public class PostController : ControllerBase
         }
         try
         {
-            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userID = _userService.GetCurrentUserId();
             if (userID == null)
             {
                 return Unauthorized();
@@ -116,7 +118,7 @@ public class PostController : ControllerBase
     {
         try
         {
-            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userID = _userService.GetCurrentUserId();
             if (userID == null)
             {
                 return Unauthorized();

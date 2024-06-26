@@ -1,17 +1,25 @@
 ﻿using PostWall.API.Models.EF;
 using PostWall.Data;
+using System.Data.Common;
 
 namespace PostWall.API.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly PostWallDbContext _context;
+    private readonly PostWallDbContext _postWallDBContext;
     public UserRepository(PostWallDbContext context)
     {
-        _context = context;
+        _postWallDBContext = context;
     }
     public async Task<ApplicationUser> GetUserByIdAsync(string id)
     {
-        return await _context.Users.FindAsync(id);
+        try
+        {
+            return await _postWallDBContext.Users.FindAsync(id);
+        }
+        catch (DbException ex)
+        {
+            throw new Exception("Error getting user", ex);
+        }
     }
 }

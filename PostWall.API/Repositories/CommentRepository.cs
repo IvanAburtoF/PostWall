@@ -61,22 +61,6 @@ public class CommentRepository : ICommentRepository
             throw new Exception("Error getting comments", ex);
         }
     }
-
-    public async Task<Comment> UpdateCommentAsync(Comment comment)
-    {
-        ArgumentNullException.ThrowIfNull(comment);
-        try
-        {
-        _postWallDbContext.Comments.Update(comment);
-        await _postWallDbContext.SaveChangesAsync();
-        return comment;
-        }
-        catch (DbUpdateException ex)
-        {
-            throw new Exception("Error updating comment", ex);
-        }
-    }
-
     public async Task DeleteCommentAsync(int id)
     {
         var comment = await _postWallDbContext.Comments.FindAsync(id);
