@@ -107,7 +107,8 @@ public class PostService : IPostService
             throw new Exception("Error deleting post", ex);
         }
     }
-
+    //TODO: refactor these 2 methods into one cuz DRY n' stuff
+    //these 2 methods could be one
     public async Task LikePostAsync(int id, string userId)
     {
         try
@@ -117,8 +118,13 @@ public class PostService : IPostService
             {
                 throw new Exception("Post not found");
             }
-
+            bool userDisliked = post.DislikedBy.Any(u => u.Id == userId);
             var userLiked = post.LikedBy.Any(u => u.Id == userId);
+            if (userDisliked)
+            {
+                var user = post.DislikedBy.First(u => u.Id == userId);
+                post.DislikedBy.Remove(user);
+            }
             if (userLiked)
             {
                 var user = post.LikedBy.First(u => u.Id == userId);

@@ -13,10 +13,12 @@ namespace PostWall.API.Controllers;
 public class CommentController : ControllerBase
 {
     private readonly ICommentService _commentService;
+    private readonly IUserService _userService;
 
-    public CommentController(ICommentService commentService)
+    public CommentController(ICommentService commentService, IUserService userService)
     {
         _commentService = commentService;
+        _userService = userService;
     }
 
     [Authorize]
@@ -35,7 +37,7 @@ public class CommentController : ControllerBase
         }
         try
         {
-            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userID = _userService.GetCurrentUserId();
             if (userID == null)
             {
                 return Unauthorized();
@@ -58,6 +60,10 @@ public class CommentController : ControllerBase
         try
         {
             var comment = await _commentService.GetCommentByIdAsync(id);
+            if (comment == null)
+            {
+                return NotFound();
+            }
             return Ok(comment);
         }
         catch (Exception ex)
@@ -65,7 +71,7 @@ public class CommentController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
         }
     }
-
+    [Authorize]
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,7 +83,7 @@ public class CommentController : ControllerBase
     {
         try
         {
-            var userID = HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userID = _userService.GetCurrentUserId();
             if (userID == null)
             {
                 return Unauthorized();

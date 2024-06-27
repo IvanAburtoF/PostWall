@@ -114,6 +114,16 @@ public class PostControllerTests
         // Act
         var result = await _postController.GetPostById(1);
     }
+    [Fact]
+    public async Task GetPostById_WithInvalidId_ReturnsNotFound()
+    {
+        // Arrange
+        _postServiceMock.Setup(x => x.GetPostByIdAsync(1)).ReturnsAsync((PostDetailsDTO?)null);
+        // Act
+        var result = await _postController.GetPostById(1);
+        // Assert
+        Assert.IsType<NotFoundResult>(result.Result);
+    }
 
     [Fact]
     public async Task GetPosts_ReturnsPosts()

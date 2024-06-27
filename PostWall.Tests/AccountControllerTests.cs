@@ -1,4 +1,5 @@
 ﻿
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -16,9 +17,14 @@ public class AccountControllerTests
 
 
     public AccountControllerTests()
-    { 
-        _signInManager = new Mock<SignInManager<ApplicationUser>>();
-        _userManager = new Mock<UserManager<ApplicationUser>>();
+    {
+        var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
+        _userManager = new Mock<UserManager<ApplicationUser>>(userStoreMock.Object, null, null, null, null, null, null, null, null);
+
+        var contextAccessorMock = new Mock<IHttpContextAccessor>();
+        var userPrincipalFactoryMock = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>();
+        _signInManager = new Mock<SignInManager<ApplicationUser>>(_userManager.Object, contextAccessorMock.Object, userPrincipalFactoryMock.Object, null, null, null, null);
+
         _accountController = new AccountController(_userManager.Object, _signInManager.Object);
     }
 
@@ -37,8 +43,73 @@ public class AccountControllerTests
 
         // Act
         var result = await _accountController.Register(model);
-        Assert.NotNull(result);
-        var okResult = result as OkResult;
-        Assert.NotNull(okResult);
+        //Assert
+        Assert.IsType<OkResult>(result);
+    }
+
+    [Fact]
+    public async Task Register_WhenCalled_ReturnsBadRequest()
+    {
+        //Arrange
+        var model = new RegisterUserDTO
+        {
+            UserName = "test",
+            Email = ""
+        };
+        _accountController.ModelState.AddModelError("Email", "The Email field is required");
+        _accountController.ModelState.AddModelError("Password", "The Password field is required");
+        //Act
+        var result = await _accountController.Register(model);
+        //Assert
+        Assert.IsType<BadRequestObjectResult>(result);
+        Assert.Equal(2, _accountController.ModelState.ErrorCount);
+    }
+    [Fact]
+    public async Task Login_WhenCalled_ReturnsOk()
+    {
+        //Arrange
+        var model = new LoginUserDTO
+        {
+            Email = "email@email.com",
+            Password = "password"
+        };
+        _signInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
+
+        //Act
+        var result = await _accountController.Login(model);
+        //Assert
+        Assert.IsType<OkResult>(result);
+    }
+    [Fact]
+    public async Task Login_WhenCalled_ReturnsBadRequest()
+    {
+        //Arrange
+        var model = new LoginUserDTO
+        {
+            Email = "email",
+            Password = "password"
+        };
+        _accountController.ModelState.AddModelError("Email", "The Email field is not a valid e-mail address.");
+        //Act
+        var result = await _accountController.Login(model);
+        //Assert
+        Assert.IsType<BadRequestObjectResult>(result);
+    }
+    [Fact]
+    public async Task Login_WhenCalled_ReturnsUnauthorized()
+    {
+        //Arrange
+        var model = new LoginUserDTO
+        {
+            Email = "email",
+            Password = "password"
+        };
+        _signInManager.Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
+        //Act
+        var result = await _accountController.Login(model);
+        //Assert
+        Assert.IsType<BadRequestObjectResult>(result);
     }
 }

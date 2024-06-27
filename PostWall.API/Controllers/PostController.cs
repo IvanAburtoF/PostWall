@@ -59,7 +59,11 @@ public class PostController : ControllerBase
         try
         {
             var post = await _postService.GetPostByIdAsync(id);
-            return Ok(post);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            return (Ok(post));
         }
         catch (Exception ex)
         {
