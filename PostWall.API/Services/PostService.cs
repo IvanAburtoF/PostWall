@@ -34,11 +34,11 @@ public class PostService : IPostService
         catch (Exception ex)
         {
 
-            throw new Exception("Error creating post", ex);
+            throw new Exception("Error Creating post", ex);
         }
     }
 
-    public async Task<PostDetailsDTO> GetPostByIdAsync(int id)
+    public async Task<PostDetailsDTO?> GetPostByIdAsync(int id)
     {
         try
         {
@@ -51,7 +51,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error getting post", ex);
+            throw new Exception("Error Getting post", ex);
         }
     }
 
@@ -74,7 +74,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error getting posts", ex);
+            throw new Exception("Error Getting posts", ex);
         }
     }
 
@@ -92,7 +92,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error updating post", ex);
+            throw new Exception("Error Updating post", ex);
         }
     }
 
@@ -104,7 +104,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error deleting post", ex);
+            throw new Exception("Error Deleting post", ex);
         }
     }
     //TODO: refactor these 2 methods into one cuz DRY n' stuff
@@ -141,7 +141,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error liking post", ex);
+            throw new Exception("Error Liking post", ex);
         }
     }
 
@@ -178,7 +178,7 @@ public class PostService : IPostService
         }
         catch (Exception ex)
         {
-            throw new Exception("Error disliking post", ex);
+            throw new Exception("Error Disliking post", ex);
         }
     }
 }

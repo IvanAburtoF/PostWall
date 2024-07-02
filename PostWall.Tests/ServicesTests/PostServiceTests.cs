@@ -5,6 +5,7 @@ using PostWall.API.Models.DTO.Media;
 using PostWall.API.Models.DTO.Post;
 using PostWall.API.Models.DTO.Tag;
 using PostWall.API.Models.EF;
+using Microsoft.AspNetCore.Identity;
 using PostWall.API.Repositories;
 using PostWall.API.Services;
 
@@ -15,12 +16,14 @@ public class PostServiceTests
     private readonly Mock<IPostRepository> _postRepositoryMock;
     private readonly Mock<IUserRepository> _userRepositoryMock;
     private readonly Mock<IMapper> _mapperMock;
+    private readonly PostService _postService;
 
     public PostServiceTests()
     {
         _postRepositoryMock = new Mock<IPostRepository>();
         _userRepositoryMock = new Mock<IUserRepository>();
         _mapperMock = new Mock<IMapper>();
+        _postService = new PostService(_postRepositoryMock.Object, _userRepositoryMock.Object, _mapperMock.Object);
     }
 
 
@@ -73,16 +76,12 @@ public class PostServiceTests
             {
                 new TagDTO { Id = 1,Name = "Test Tag" }
             }
-        };
-        var postRepositoryMock = new Mock<IPostRepository>();
-        postRepositoryMock.Setup(x => x.CreatePostAsync(It.IsAny<Post>())).ReturnsAsync(createdPost);
-        var userRepositoryMock = new Mock<IUserRepository>();
-        var mapperMock = new Mock<IMapper>();
-        mapperMock.Setup(x => x.Map<Post>(postDTO)).Returns(post);
-        mapperMock.Setup(x => x.Map<PostDetailsDTO>(createdPost)).Returns(postDetailsDTO);
-        var postService = new PostService(postRepositoryMock.Object, userRepositoryMock.Object, mapperMock.Object);
+        };        
+        _postRepositoryMock.Setup(x => x.CreatePostAsync(It.IsAny<Post>())).ReturnsAsync(createdPost);                
+        _mapperMock.Setup(x => x.Map<Post>(postDTO)).Returns(post);
+        _mapperMock.Setup(x => x.Map<PostDetailsDTO>(createdPost)).Returns(postDetailsDTO);
         // Act
-        var result = await postService.CreatePostAsync(postDTO, "1");
+        var result = await _postService.CreatePostAsync(postDTO, "1");
         // Assert
         Assert.IsType<PostDetailsDTO>(result);
         Assert.Equal(createdPost.Id, result.Id);
@@ -93,14 +92,215 @@ public class PostServiceTests
     {
         // Arrange
         var postDTO = new CreatePostDTO();
-        var postRepositoryMock = new Mock<IPostRepository>();
-        var userRepositoryMock = new Mock<IUserRepository>();
-        var mapperMock = new Mock<IMapper>();
-        mapperMock.Setup(x => x.Map<Post>(postDTO)).Throws<AutoMapperMappingException>();
-        var postService = new PostService(postRepositoryMock.Object, userRepositoryMock.Object, mapperMock.Object);
+        _mapperMock.Setup(x => x.Map<Post>(postDTO)).Throws<AutoMapperMappingException>();
+
         // Act
-        var exception = await Assert.ThrowsAsync<Exception>(() => postService.CreatePostAsync(postDTO, "1"));
+        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.CreatePostAsync(postDTO, "1"));
         // Assert
         Assert.Equal("Error Mapping post", exception.Message);
+    }
+
+    [Fact]
+    public async Task CreatePostAsync_WithRepositoryError_ReturnsRepositoryError()
+    {
+        // Arrange
+        var postDTO = new CreatePostDTO
+        {
+            Title = "Test Post",
+            Media = new CreateMediaDTO
+            {
+                Url = "https://example.com/image.jpg",
+                Type = "Jpg"
+            },
+            Tags = new List<CreateTagDTO>
+            {
+                new CreateTagDTO { Name = "Test Tag" }
+            }
+        };
+        var post = new Post
+        {
+            Title = postDTO.Title,
+            Media = new Media
+            {
+                Url = postDTO.Media.Url,
+                Type = MediaType.Jpg
+            },
+            Tags = new List<Tag>
+            {
+                new Tag { Name = "Test Tag" }
+            }
+        };
+        
+        _postRepositoryMock.Setup(x => x.CreatePostAsync(It.IsAny<Post>())).Throws<Exception>();        
+        _mapperMock.Setup(x => x.Map<Post>(postDTO)).Returns(post);
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.CreatePostAsync(postDTO, "1"));
+        // Assert
+        Assert.Equal("Error Creating post", exception.Message);
+    }
+
+    [Fact]
+    public async Task GetPostByIdAsync_WithValidData_ReturnsPost()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Media = new Media
+            {
+                Id = 1,
+                Url = "https://example.com/image.jpg",
+                Type = MediaType.Jpg
+            },
+            Tags = new List<Tag>
+            {
+                new Tag { Id = 1, Name = "Test Tag" }
+            }
+        };
+        var postDetailsDTO = new PostDetailsDTO
+        {
+            Id = post.Id,
+            Title = "Test Post",
+            Media = new MediaDTO
+            {
+                Id = 1,
+                Url = "https://example.com/image.jpg",
+                Type = "Jpg"
+            },
+            Tags = new List<TagDTO>
+            {
+                new TagDTO { Id = 1, Name = "Test Tag" }
+            }
+        };        
+        _postRepositoryMock.Setup(x => x.GetPostByIdAsync(1)).ReturnsAsync(post);        
+        _mapperMock.Setup(x => x.Map<PostDetailsDTO>(post)).Returns(postDetailsDTO);
+
+        // Act
+        var result = await _postService.GetPostByIdAsync(1);
+        // Assert
+        Assert.IsType<PostDetailsDTO>(result);
+        Assert.Equal(post.Id, result.Id);
+    }
+
+    [Fact]
+    public async Task GetPostByIdAsync_WithInvalidData_ReturnsPostNotFound()
+    {
+        // Arrange        
+        _postRepositoryMock.Setup(x => x.GetPostByIdAsync(1)).ReturnsAsync((Post?)null);        
+        var postService = new PostService(_postRepositoryMock.Object,  _userRepositoryMock.Object, _mapperMock.Object);
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.GetPostByIdAsync(1));
+        // Assert
+        Assert.Equal("Post not found", exception.Message);
+    }
+    [Fact]
+    public async Task GetPostByIdAsync_WithRepositoryError_ReturnsRepositoryError()
+    {
+        // Arrange
+        
+        _postRepositoryMock.Setup(x => x.GetPostByIdAsync(1)).Throws<Exception>();        
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.GetPostByIdAsync(1));
+        // Assert
+        Assert.Equal("Error Getting post", exception.Message);
+    }
+    [Fact]
+    public async Task GetPostsAsync_WithValidData_ReturnsPosts()
+    {
+        // Arrange
+        var posts = new List<Post>
+        {
+            new Post
+            {
+                Id = 1,
+                Title = "Test Post",
+                Media = new Media
+                {
+                    Id = 1,
+                    Url = "https://example.com/image.jpg",
+                    Type = MediaType.Jpg
+                },
+                Tags = new List<Tag>
+                {
+                    new Tag { Id = 1, Name = "Test Tag" }
+                }
+            }
+        };
+        var postDetailsDTOs = new List<PostDetailsDTO>
+        {
+            new PostDetailsDTO
+            {
+                Id = posts.First().Id,
+                Title = "Test Post",
+                Media = new MediaDTO
+                {
+                    Id = 1,
+                    Url = "https://example.com/image.jpg",
+                    Type = "Jpg"
+                },
+                Tags = new List<TagDTO>
+                {
+                    new TagDTO { Id = 1, Name = "Test Tag" }
+                }
+            }
+        };
+        _postRepositoryMock.Setup(x => x.GetPostsAsync()).ReturnsAsync(posts);        
+        _mapperMock.Setup(x => x.Map<List<PostDetailsDTO>>(posts)).Returns(postDetailsDTOs);
+
+        // Act
+        var result = await _postService.GetPostsAsync();
+        // Assert
+        Assert.IsType<List<PostDetailsDTO>>(result);
+        Assert.Equal(posts.Count, result.Count());
+    }
+    [Fact]
+    public async Task GetPostsAsync_WithRepositoryError_ReturnsRepositoryError()
+    {
+        // Arrange
+        
+        _postRepositoryMock.Setup(x => x.GetPostsAsync()).Throws<Exception>();
+        
+
+        // Act
+        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.GetPostsAsync());
+        // Assert
+        Assert.Equal("Error Getting posts", exception.Message);
+    }
+    [Fact]
+    public async Task LikePostAsync_WithCorrectData_AddLikeUser()
+    {
+        // Arrange
+        var post = new Post
+        {
+            Id = 1,
+            Title = "Test Post",
+            Media = new Media
+            {
+                Id = 1,
+                Url = "https://example.com/image.jpg",
+                Type = MediaType.Jpg
+            },
+            Tags = new List<Tag>
+            {
+                new Tag { Id = 1, Name = "Test Tag" }
+            }
+        };
+        var user = new ApplicationUser
+        {
+            Id = "1",
+            UserName = "Test User"
+        };
+        _postRepositoryMock.Setup(x => x.GetPostByIdAsync(1)).ReturnsAsync(post);
+        _postRepositoryMock.Setup(x => x.UpdatePostAsync(post)).ReturnsAsync(post).Verifiable("Not called");
+        _userRepositoryMock.Setup(x => x.GetUserByIdAsync("1")).ReturnsAsync(user);
+        
+        // Act
+        await _postService.LikePostAsync(1, "1");
+        // Assert
+        Assert.Contains(user, post.LikedBy);
+        _postRepositoryMock.Verify(x => x.UpdatePostAsync(post), Times.Once);
     }
 }
