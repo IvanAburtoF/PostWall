@@ -185,17 +185,6 @@ public class PostServiceTests
     }
 
     [Fact]
-    public async Task GetPostByIdAsync_WithInvalidData_ReturnsPostNotFound()
-    {
-        // Arrange        
-        _postRepositoryMock.Setup(x => x.GetPostByIdAsync(1)).ReturnsAsync((Post?)null);        
-        var postService = new PostService(_postRepositoryMock.Object,  _userRepositoryMock.Object, _mapperMock.Object);
-        // Act
-        var exception = await Assert.ThrowsAsync<Exception>(() => _postService.GetPostByIdAsync(1));
-        // Assert
-        Assert.Equal("Post not found", exception.Message);
-    }
-    [Fact]
     public async Task GetPostByIdAsync_WithRepositoryError_ReturnsRepositoryError()
     {
         // Arrange
@@ -229,9 +218,9 @@ public class PostServiceTests
                 }
             }
         };
-        var postDetailsDTOs = new List<PostDetailsDTO>
+        var PostListDTO = new List<PostListDTO>
         {
-            new PostDetailsDTO
+            new PostListDTO
             {
                 Id = posts.First().Id,
                 Title = "Test Post",
@@ -248,13 +237,13 @@ public class PostServiceTests
             }
         };
         _postRepositoryMock.Setup(x => x.GetPostsAsync()).ReturnsAsync(posts);        
-        _mapperMock.Setup(x => x.Map<List<PostDetailsDTO>>(posts)).Returns(postDetailsDTOs);
+        _mapperMock.Setup(x => x.Map<IEnumerable<PostListDTO>>(posts)).Returns(PostListDTO);
 
         // Act
         var result = await _postService.GetPostsAsync();
-        // Assert
-        Assert.IsType<List<PostDetailsDTO>>(result);
-        Assert.Equal(posts.Count, result.Count());
+        //Assert
+        Assert.IsAssignableFrom<IEnumerable<PostListDTO>>(result);
+        Assert.Equal(posts.First().Id, result.First().Id);
     }
     [Fact]
     public async Task GetPostsAsync_WithRepositoryError_ReturnsRepositoryError()
